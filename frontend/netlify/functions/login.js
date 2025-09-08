@@ -6,7 +6,7 @@ exports.handler = async (event, context) => {
 
   try {
     const { email, password } = JSON.parse(event.body);
-    const response = await fetch('https://reellocal-backend.onrender.com/api/auth/login', {
+    const response = await fetch('https://reel-local.onrender.com/api/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

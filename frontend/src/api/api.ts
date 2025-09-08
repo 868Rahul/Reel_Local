@@ -3,7 +3,7 @@ export class ApiClient {
 
   constructor() {
     // Use environment variable with fallback for flexibility
-    this.baseUrl = import.meta.env.VITE_API_URL || 'https://reellocal-backend.onrender.com';
+    this.baseUrl = import.meta.env.VITE_API_URL || 'https://reel-local.onrender.com/api';
     console.log('API Client initialized with Base URL:', this.baseUrl);
   }
 
