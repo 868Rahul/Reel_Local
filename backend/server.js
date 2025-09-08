@@ -19,7 +19,7 @@ const connectDB = require('./config/database');
 connectDB();
 
 const corsOptions = {
-  origin: ['https://reellocal.netlify.app'],
+  origin: ['https://reel-local.vercel.app/'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
