@@ -1,0 +1,2 @@
+# This file ensures the uploads directory is tracked by git
+# while the .gitignore prevents actual uploaded files from being committed 
