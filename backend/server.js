@@ -19,7 +19,7 @@ const connectDB = require('./config/database');
 connectDB();
 
 const corsOptions = {
-  origin: ['https://reel-local.vercel.app'],
+  origin: ['https://reel-local.vercel.app','http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
