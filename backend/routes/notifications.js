@@ -27,4 +27,12 @@ router.put('/:id/read', auth, (req, res) => {
   }
 });
 
+router.patch('/:id/read', auth, (req, res) => {
+  if (typeof notificationController.markNotificationRead === 'function') {
+    notificationController.markNotificationRead(req, res);
+  } else {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 module.exports = router; 

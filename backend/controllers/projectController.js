@@ -384,10 +384,10 @@ const requestReedit = async (req, res) => {
     if (project.owner.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Only the project owner can request a re-edit' });
     }
-    if (!project.finalVideoFile || !project.finalVideoFile.uploadedAt) {
+    if (!project.finalFile || !project.finalFile.uploadedAt) {
       return res.status(400).json({ message: 'Final reel not delivered yet' });
     }
-    const deliveredAt = new Date(project.finalVideoFile.uploadedAt);
+    const deliveredAt = new Date(project.finalFile.uploadedAt);
     const now = new Date();
     const hoursSinceDelivery = (now - deliveredAt) / (1000 * 60 * 60);
     if (hoursSinceDelivery > 72) {
@@ -529,7 +529,7 @@ const getEditorEarnings = async (req, res) => {
         projectId: project._id,
         title: project.title,
         amount: totalPaid,
-        deliveredAt: project.finalVideoFile?.uploadedAt || project.updatedAt
+        deliveredAt: project.finalFile?.uploadedAt || project.updatedAt
       });
     });
     // Get payout history and payment status from user

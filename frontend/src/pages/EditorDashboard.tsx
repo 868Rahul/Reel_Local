@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Clock, DollarSign, Upload, Eye, Play, BadgeCheck, Camera, Bell, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiClient } from "@/lib/api";
+import { apiClient } from "@/api/api";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -521,7 +521,7 @@ const EditorDashboard = () => {
                                 </div>
                                 <div className="text-right">
                                   <p className="text-xl font-bold text-green-600">{project.earnings}</p>
-                                  {project.status === 'completed' && project.finalVideoFile?.uploadedAt && (
+                                  {project.status === 'completed' && project.finalFile?.uploadedAt && (
                                     <CheckCircle className="inline-block h-6 w-6 text-green-500 ml-2 align-middle animate-bounce" />
                                   )}
                                 </div>

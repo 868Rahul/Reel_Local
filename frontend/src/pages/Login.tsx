@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiClient } from "@/lib/api";
+import { apiClient } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 import { Camera } from 'lucide-react';
 

@@ -159,6 +159,53 @@ export class ApiClient {
     });
     return this.handleResponse(res);
   }
+
+  async markNotificationAsRead(notificationId: string) {
+    const res = await fetch(`${this.baseUrl}/notifications/${notificationId}/read`, {
+      method: 'PATCH',
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(res);
+  }
+
+  // ---------- Project Management ----------
+  async addCollaborator(projectId: string, userId: string, role: string) {
+    const res = await fetch(`${this.baseUrl}/projects/${projectId}/collaborators`, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ userId, role }),
+    });
+    return this.handleResponse(res);
+  }
+
+  async uploadFinalVideo(projectId: string, file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const res = await fetch(`${this.baseUrl}/upload/final/${projectId}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      body: formData,
+    });
+    return this.handleResponse(res);
+  }
+
+  async deliverProject(projectId: string) {
+    const res = await fetch(`${this.baseUrl}/projects/${projectId}/deliver`, {
+      method: 'PATCH',
+      headers: this.getAuthHeaders(),
+    });
+    return this.handleResponse(res);
+  }
+
+  async updateProject(projectId: string, data: any) {
+    const res = await fetch(`${this.baseUrl}/projects/${projectId}`, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    return this.handleResponse(res);
+  }
 }
 
 export const apiClient = new ApiClient();

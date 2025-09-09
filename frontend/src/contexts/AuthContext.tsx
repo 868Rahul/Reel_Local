@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { apiClient, User, AuthResponse } from '../lib/api';
+import { apiClient, User, AuthResponse } from '../api/api';
 
 interface UserStats {
   totalProjects: number;

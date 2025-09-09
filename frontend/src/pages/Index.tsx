@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Play, Upload, Star, Clock, Users, CheckCircle, Briefcase, Video, HelpCircle, Mail, FileText, Camera } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
-import { getTestimonials, getStats } from "@/lib/api";
+import { getTestimonials, getStats } from "@/api/api";
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
 const Index = () => {

@@ -16,6 +16,19 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: false,
+      chunkSizeWarningLimit: 1000, // increase from 500kb → 1MB
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            vendor: [
+              'react-router-dom',
+              'axios',
+              // add other big deps here
+            ],
+          },
+        },
+      },
     },
     define: {
       __API_URL__: JSON.stringify(env.VITE_API_URL),

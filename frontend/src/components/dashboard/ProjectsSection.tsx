@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiClient, Project } from "@/lib/api";
+import { apiClient, Project } from "@/api/api";
 import ProjectCard from "./ProjectCard";
 // import { useLanguage } from '@/contexts/LanguageContext'; // Removed
 

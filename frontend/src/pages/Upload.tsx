@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Upload as UploadIcon, X, Play, Image, Clock, DollarSign, FileVideo, FileImage, Camera, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiClient, getTemplates } from "@/lib/api";
+import { apiClient, getTemplates } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 // import LanguageSelector from '@/components/LanguageSelector'; // Removed
 // import { useLanguage } from '@/contexts/LanguageContext'; // Removed

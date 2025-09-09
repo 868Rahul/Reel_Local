@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
 import { Bell, Camera } from "lucide-react";
-import { apiClient, API_BASE_URL } from '@/lib/api';
+import { apiClient, API_BASE_URL } from '@/api/api';
 import React from "react";
 
 function setGoogleTranslate(lang) {

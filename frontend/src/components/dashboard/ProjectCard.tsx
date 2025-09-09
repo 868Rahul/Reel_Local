@@ -6,7 +6,7 @@ import { Upload, Clock, CheckCircle, Star, Eye, Download, RefreshCcw, MessageSqu
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { API_BASE_URL } from '@/lib/api';
+import { API_BASE_URL } from '@/api/api';
 
 interface Project {
   _id: string;
@@ -20,7 +20,7 @@ interface Project {
   estimatedDelivery?: string;
   requestedAt?: string;
   thumbnail?: string;
-  finalVideoFile?: { filename?: string; uploadedAt?: string };
+  finalFile?: { url?: string; originalname?: string; uploadedAt?: string };
   reeditRequests?: { status: string }[];
   reviews?: Array<{ user: string; rating: number; comment?: string }>;
   collaborators?: Array<{ user: string; role: string }>;
@@ -75,8 +75,8 @@ const ProjectCard = ({ project, index, user, onDelete, onEdit, onRatingUpdate }:
 
   // Helper to check if re-edit can be requested
   const canRequestReedit = () => {
-    if (!project.finalVideoFile || !project.finalVideoFile.uploadedAt) return false;
-    const deliveredAt = new Date(project.finalVideoFile.uploadedAt);
+    if (!project.finalFile || !project.finalFile.uploadedAt) return false;
+    const deliveredAt = new Date(project.finalFile.uploadedAt);
     const now = new Date();
     const hoursSinceDelivery = (now.getTime() - deliveredAt.getTime()) / (1000 * 60 * 60);
     if (hoursSinceDelivery > 72) return false;
@@ -101,8 +101,8 @@ const ProjectCard = ({ project, index, user, onDelete, onEdit, onRatingUpdate }:
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (project.finalVideoFile && project.finalVideoFile.filename) {
-      window.open(`/uploads/${project.finalVideoFile.filename}`, '_blank');
+    if (project.finalFile && project.finalFile.url) {
+      window.open(project.finalFile.url, '_blank');
     }
   };
 
@@ -389,7 +389,7 @@ const ProjectCard = ({ project, index, user, onDelete, onEdit, onRatingUpdate }:
               )}
             </div>
             <div className="flex items-center space-x-2">
-              {project.finalVideoFile && project.finalVideoFile.filename && (
+              {project.finalFile && project.finalFile.url && (
                 <Button
                   variant="outline"
                   size="sm"

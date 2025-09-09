@@ -21,7 +21,17 @@ connectDB();
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true); // Allow Postman/curl
-    if (origin.includes('vercel.app') || origin === 'http://localhost:5173') {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      process.env.FRONTEND_URL,
+      /\.vercel\.app$/,
+      /\.vercel\.dev$/
+    ];
+    
+    if (allowedOrigins.some(allowed => 
+      typeof allowed === 'string' ? origin === allowed : allowed.test(origin)
+    )) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));

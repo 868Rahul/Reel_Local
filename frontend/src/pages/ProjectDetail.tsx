@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiClient, API_BASE_URL } from "@/lib/api";
+import { apiClient, API_BASE_URL } from "@/api/api";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Paperclip, Send } from "lucide-react";
