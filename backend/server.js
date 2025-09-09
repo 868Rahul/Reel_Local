@@ -19,14 +19,16 @@ const connectDB = require('./config/database');
 connectDB();
 
 const corsOptions = {
-  origin: ['https://reel-local.vercel.app','http://localhost:5173'],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // Allow Postman/curl
+    if (origin.includes('vercel.app') || origin === 'http://localhost:5173') {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
 };
 app.use(cors(corsOptions));
-
-
 
 
 // Rate limiting
