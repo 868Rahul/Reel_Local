@@ -206,6 +206,34 @@ export class ApiClient {
     });
     return this.handleResponse(res);
   }
+
+  async uploadVideo(projectId: string, file: File) {
+    const formData = new FormData();
+    formData.append('video', file);
+    
+    const res = await fetch(`${this.baseUrl}/upload/video/${projectId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+      body: formData,
+    });
+    return this.handleResponse(res);
+  }
+
+  async uploadThumbnail(projectId: string, file: File) {
+    const formData = new FormData();
+    formData.append('thumbnail', file);
+    
+    const res = await fetch(`${this.baseUrl}/upload/thumbnail/${projectId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.getToken()}`,
+      },
+      body: formData,
+    });
+    return this.handleResponse(res);
+  }
 }
 
 export const apiClient = new ApiClient();

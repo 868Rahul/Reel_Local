@@ -109,6 +109,9 @@ const EditorDashboard = () => {
       }
 
       try {
+        // Add a small delay to ensure token is properly set
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         // Fetch notifications using apiClient
         const notificationsData = await apiClient.getNotifications();
         setNotifications(notificationsData.notifications || []);

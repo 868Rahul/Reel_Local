@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Shield, CreditCard, Smartphone, Banknote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { API_BASE_URL } from '@/api/api';
 
 interface RazorpayPaymentProps {
   amount: number; // Amount in rupees
@@ -52,7 +53,7 @@ const RazorpayPayment: React.FC<RazorpayPaymentProps> = ({
       }
 
       // Create order on backend
-      const orderResponse = await fetch('/api/payment/create-order', {
+      const orderResponse = await fetch(`${API_BASE_URL}/payment/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -31,11 +31,21 @@ const DashboardHeader = () => {
 
   useEffect(() => {
     if (!user) return;
-    apiClient.getNotifications()
-      .then(data => {
-        setNotifications(data.notifications || []);
-        setUnreadCount((data.notifications || []).filter((n: any) => !n.read).length);
-      });
+    
+    // Add a small delay to ensure token is properly set
+    const timer = setTimeout(() => {
+      apiClient.getNotifications()
+        .then(data => {
+          setNotifications(data.notifications || []);
+          setUnreadCount((data.notifications || []).filter((n: any) => !n.read).length);
+        })
+        .catch(error => {
+          console.error('Failed to load notifications:', error);
+          // Don't show error to user, just log it
+        });
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [user, open]);
 
   const markAsRead = async (id: string) => {

@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Upload as UploadIcon, X, Play, Image, Clock, DollarSign, FileVideo, FileImage, Camera, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiClient, getTemplates } from "@/api/api";
+import { apiClient, getTemplates, API_BASE_URL } from "@/api/api";
 import { useToast } from "@/hooks/use-toast";
 // import LanguageSelector from '@/components/LanguageSelector'; // Removed
 // import { useLanguage } from '@/contexts/LanguageContext'; // Removed
@@ -107,7 +107,7 @@ const Upload = () => {
       .catch(() => setErrorTemplates('Failed to load templates'))
       .finally(() => setLoadingTemplates(false));
     // Fetch editors
-    fetch("/api/editors", {
+    fetch(`${API_BASE_URL}/editors`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())
@@ -274,7 +274,7 @@ const Upload = () => {
           const formData = new FormData();
           uploadedFiles.forEach(f => formData.append('files', f.file));
           
-          const uploadResponse = await fetch(`/api/upload/raw/${project._id}`, {
+          const uploadResponse = await fetch(`${API_BASE_URL}/upload/raw/${project._id}`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             body: formData,

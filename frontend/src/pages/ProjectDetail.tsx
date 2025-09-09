@@ -44,7 +44,10 @@ const ProjectDetail = () => {
     fetchProject();
     fetchMessages();
     // Connect to Socket.IO
-    const sock = io('http://localhost:5000');
+    const socketUrl = import.meta.env.VITE_API_URL ? 
+      import.meta.env.VITE_API_URL.replace('/api', '') : 
+      'http://localhost:5000';
+    const sock = io(socketUrl);
     setSocket(sock);
     
     sock.on('connect', () => {
@@ -196,7 +199,7 @@ const ProjectDetail = () => {
               onClick={() => window.location.href = user.role === 'editor' ? '/editor-dashboard' : '/business-dashboard'}
               className="bg-gradient-to-r from-teal-600 to-orange-500 hover:from-teal-700 hover:to-orange-600 text-white font-semibold px-6 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border-0"
             >
-          Back to Dashboard
+          ← Back to Dashboard
         </Button>
         {/* <LanguageSelector /> */}
       </div>

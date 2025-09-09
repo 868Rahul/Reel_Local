@@ -50,22 +50,25 @@ const ProjectEdit = () => {
     if (!id) return;
     setSaving(true);
     try {
+      // Update project basic info first
       await apiClient.updateProject(id, {
         title,
         description,
         category,
-        videoFile,
-        thumbnailFile,
-      } as any);
+      });
+      
+      // Upload files separately if they exist
       if (videoFile) {
         await apiClient.uploadVideo(id, videoFile);
       }
       if (thumbnailFile) {
         await apiClient.uploadThumbnail(id, thumbnailFile);
       }
-      alert("Project updated!");
-      navigate(-1);
+      
+      alert("Project updated successfully!");
+      navigate('/business-dashboard');
     } catch (err) {
+      console.error('Update error:', err);
       alert("Failed to update project");
     } finally {
       setSaving(false);
@@ -79,7 +82,7 @@ const ProjectEdit = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-orange-50 p-4 relative">
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
         <Button variant="outline" className="rounded-xl border-teal-200 bg-white/80 hover:bg-teal-50 shadow" onClick={() => navigate('/business-dashboard')}>
-          Back to Dashboard
+          ← Back to Dashboard
         </Button>
       </div>
       <Card className="w-full max-w-2xl shadow-2xl border-0 rounded-3xl bg-white/90 backdrop-blur-xl">

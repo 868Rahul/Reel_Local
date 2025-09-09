@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Mail, MessageCircle, HelpCircle } from "lucide-react";
+import { API_BASE_URL } from "@/api/api";
 
 const Support = () => {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ const Support = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/projects/faqs")
+    fetch(`${API_BASE_URL}/projects/faqs`)
       .then(res => res.json())
       .then(data => setFaqs(data.faqs || []))
       .catch(() => setFaqs([]))
@@ -28,7 +29,7 @@ const Support = () => {
     setSuccess("");
     setError("");
     try {
-      const res = await fetch("/api/projects/support", {
+      const res = await fetch(`${API_BASE_URL}/projects/support`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
