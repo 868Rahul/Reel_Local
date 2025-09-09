@@ -541,18 +541,10 @@ const EditorDashboard = () => {
                                       className="bg-green-600 hover:bg-green-700" 
                                       onClick={async () => {
                                         try {
-                                          const res = await fetch(`${API_BASE_URL}/projects/${project._id}/deliver`, {
-                                            method: 'PATCH',
-                                            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                                          });
-                                          if (res.ok) {
-                                            toast({ title: 'Project marked as delivered!', variant: 'success' });
-                                            // Refresh all data to update stats
-                                            refreshAllData();
-                                          } else {
-                                            const errorText = await res.text();
-                                            throw new Error('Failed to mark as delivered: ' + errorText);
-                                          }
+                                          await apiClient.deliverProject(project._id);
+                                          toast({ title: 'Project marked as delivered!', variant: 'success' });
+                                          // Refresh all data to update stats
+                                          refreshAllData();
                                         } catch (err: any) {
                                           toast({ title: 'Failed to mark as delivered', description: err.message, variant: 'destructive' });
                                         }

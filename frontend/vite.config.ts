@@ -3,20 +3,22 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig(({ mode }) => {
-  // Load env variables based on the current mode (development, production)
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
     plugins: [react()],
-    base: '/', // Ensure correct routing
+    base: '/',
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src')
-      }
+        '@': path.resolve(__dirname, './src'),
+      },
     },
     build: {
       outDir: 'dist',
-      sourcemap: false, // Disable sourcemaps for smaller build
+      sourcemap: false,
+    },
+    define: {
+      __API_URL__: JSON.stringify(env.VITE_API_URL),
     },
   };
 });
