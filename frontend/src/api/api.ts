@@ -1,11 +1,13 @@
 export class ApiClient {
   private baseUrl: string;
 
-  constructor() {
-    // Use environment variable with fallback for flexibility
-    this.baseUrl = import.meta.env.VITE_API_URL || 'https://reel-local.onrender.com/api';
-    console.log('API Client initialized with Base URL:', this.baseUrl);
+constructor() {
+  this.baseUrl = import.meta.env.VITE_API_URL;
+  if (!this.baseUrl) {
+    throw new Error("VITE_API_URL is not defined. Please check your .env files or Vercel env settings.");
   }
+  console.log('API Client initialized with Base URL:', this.baseUrl);
+}
 
   async login(email: string, password: string) {
     try {
