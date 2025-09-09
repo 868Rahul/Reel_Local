@@ -55,6 +55,9 @@ const EditorDashboard = () => {
   const [notifOpen, setNotifOpen] = useState(false);
 
   useEffect(() => {
+
+    console.log('API Client instance:', apiClient);
+    console.log('API Client methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(apiClient)));
     const fetchData = async () => {
       try {
         // Fetch available jobs using apiClient
@@ -975,5 +978,6 @@ const EditorDashboard = () => {
     </div>
   );
 };
+
 
 export default EditorDashboard;
