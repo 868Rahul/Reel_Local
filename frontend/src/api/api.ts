@@ -59,6 +59,10 @@ export class ApiClient {
     });
   }
 
+  async getCurrentUser() {
+    return this.fetchWithHandler(`${this.baseUrl}/auth/me`);
+  }
+
   // Project methods
   async getAvailableJobs() {
     return this.fetchWithHandler(`${this.baseUrl}/projects/available-jobs`);
@@ -98,20 +102,26 @@ export class ApiClient {
     });
   }
 
-  // Upload methods
+  // Upload methods - this needs special handling for FormData
   async uploadFinalVideo(projectId: string, file: File) {
     const formData = new FormData();
     formData.append('file', file);
     
     const token = localStorage.getItem('token');
     
-    return fetch(`${this.baseUrl}/upload/final/${projectId}`, {
+    const response = await fetch(`${this.baseUrl}/upload/final/${projectId}`, {
       method: 'POST',
       headers: {
         'Authorization': token ? `Bearer ${token}` : '',
       },
       body: formData
     });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+    
+    return response.json();
   }
 
   // Deliver project method

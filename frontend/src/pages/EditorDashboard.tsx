@@ -7,10 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Clock, DollarSign, Upload, Eye, Play, BadgeCheck, Camera, Bell, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getAvailableJobs, getEditorProjects } from "@/lib/api";   
 import { useAuth } from "@/contexts/AuthContext";
 import { apiClient } from "@/lib/api";
-import { API_BASE_URL } from '@/lib/api';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -57,42 +55,72 @@ const EditorDashboard = () => {
   const [notifOpen, setNotifOpen] = useState(false);
 
   useEffect(() => {
-    getAvailableJobs()
-      .then((data) => {
-        setAvailableJobs(data.jobs || []);
+    const fetchData = async () => {
+      try {
+        // Fetch available jobs using apiClient
+        setLoadingJobs(true);
+        const jobsData = await apiClient.getAvailableJobs();
+        setAvailableJobs(jobsData.jobs || []);
         setErrorJobs(null);
-      })
-      .catch(() => setErrorJobs('Failed to load available jobs'))
-      .finally(() => setLoadingJobs(false));
-    getEditorProjects()
-      .then((data) => {
-        setMyProjects(data.projects || []);
+      } catch (err) {
+        setErrorJobs('Failed to load available jobs');
+        console.error('Error loading jobs:', err);
+      } finally {
+        setLoadingJobs(false);
+      }
+
+      try {
+        // Fetch editor projects using apiClient
+        setLoadingProjects(true);
+        const projectsData = await apiClient.getEditorProjects();
+        setMyProjects(projectsData.projects || []);
         setErrorProjects(null);
-      })
-      .catch(() => setErrorProjects('Failed to load your projects'))
-      .finally(() => setLoadingProjects(false));
-    fetch('/api/projects/editor/earnings', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => res.json())
-      .then(data => setEarnings(data))
-      .catch(() => setEarnings(null))
-      .finally(() => setLoadingEarnings(false));
-    fetch(`/api/projects/editor/${user._id}/reviews`)
-      .then(res => res.json())
-      .then(data => {
-        setReviews(data.reviews || []);
-        setAvgRating(data.averageRating);
-        setCompletedProjects(data.completedProjects || 0);
-      })
-      .catch(() => setReviews([]));
-    if (!user) return;
-    apiClient.getNotifications()
-      .then(data => {
-        setNotifications(data.notifications || []);
-        setUnreadCount((data.notifications || []).filter((n: any) => !n.read).length);
-      });
-  }, [user._id]);
+      } catch (err) {
+        setErrorProjects('Failed to load your projects');
+        console.error('Error loading projects:', err);
+      } finally {
+        setLoadingProjects(false);
+      }
+
+      try {
+        // Fetch earnings using apiClient
+        setLoadingEarnings(true);
+        const earningsData = await apiClient.getEditorEarnings();
+        setEarnings(earningsData);
+      } catch (err) {
+        console.error('Error loading earnings:', err);
+        setEarnings(null);
+      } finally {
+        setLoadingEarnings(false);
+      }
+
+      try {
+        // Fetch reviews using apiClient
+        const reviewsData = await apiClient.getEditorReviews(user._id);
+        setReviews(reviewsData.reviews || []);
+        setAvgRating(reviewsData.averageRating);
+        setCompletedProjects(reviewsData.completedProjects || 0);
+      } catch (err) {
+        console.error('Error loading reviews:', err);
+        setReviews([]);
+      }
+
+      try {
+        // Fetch notifications using apiClient
+        const notificationsData = await apiClient.getNotifications();
+        setNotifications(notificationsData.notifications || []);
+        setUnreadCount((notificationsData.notifications || []).filter((n: any) => !n.read).length);
+      } catch (err) {
+        console.error('Error loading notifications:', err);
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    };
+
+    if (user?._id) {
+      fetchData();
+    }
+  }, [user?._id]);
 
   const getIndustryColor = (industry: string) => {
     const colors: { [key: string]: string } = {
@@ -120,9 +148,12 @@ const EditorDashboard = () => {
     try {
       await apiClient.addCollaborator(job._id, user._id, 'editor');
       toast({ title: 'Project accepted!', variant: 'success' });
-      // Refresh jobs and projects
-      getAvailableJobs().then(data => setAvailableJobs(data.jobs || []));
-      getEditorProjects().then(data => setMyProjects(data.projects || []));
+      // Refresh jobs and projects using apiClient
+      const jobsData = await apiClient.getAvailableJobs();
+      setAvailableJobs(jobsData.jobs || []);
+      
+      const projectsData = await apiClient.getEditorProjects();
+      setMyProjects(projectsData.projects || []);
     } catch (err: any) {
       toast({ title: 'Failed to accept project', description: err.message, variant: 'destructive' });
     }
@@ -133,7 +164,7 @@ const EditorDashboard = () => {
   const handleUploadPortfolio = () => toast({ title: 'Upload Portfolio coming soon!' });
   const handlePaymentHistory = () => toast({ title: 'Payment History coming soon!' });
 
-  // Upload handler
+  // Upload handler - updated to use apiClient
   const handleUploadClick = (projectId: string) => {
     setUploadingProjectId(projectId);
     setUploadModalOpen(true);
@@ -144,38 +175,22 @@ const EditorDashboard = () => {
     const file = e.target.files?.[0];
     setFinalVideoFile(file || null);
     if (!file || !uploadingProjectId) return;
+    
     setUploading(true);
     setUploadProgress(0);
+    
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${API_BASE_URL}/upload/final/${uploadingProjectId}`);
-      xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('token')}`);
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress(percent);
-        }
-      };
-      xhr.onload = () => {
+      // Use apiClient for upload
+      await apiClient.uploadFinalVideo(uploadingProjectId, file);
+      
       setUploading(false);
       setUploadModalOpen(false);
       setUploadingProjectId(null);
       setUploadProgress(0);
-        setFinalVideoFile(null);
-        if (xhr.status >= 200 && xhr.status < 300) {
-          toast({ title: 'Upload successful! Project marked as completed.', variant: 'success' });
-          refreshAllData();
-        } else {
-          toast({ title: 'Upload failed', description: xhr.statusText, variant: 'destructive' });
-        }
-      };
-      xhr.onerror = () => {
-        setUploading(false);
-        toast({ title: 'Upload failed', description: 'Network error', variant: 'destructive' });
-      };
-      xhr.send(formData);
+      setFinalVideoFile(null);
+      
+      toast({ title: 'Upload successful! Project marked as completed.', variant: 'success' });
+      refreshAllData();
     } catch (err: any) {
       setUploading(false);
       toast({ title: 'Upload failed', description: err.message, variant: 'destructive' });
@@ -192,41 +207,51 @@ const EditorDashboard = () => {
     }
   };
 
-  const refreshAllData = () => {
-    getAvailableJobs()
-      .then((data) => {
-        setAvailableJobs(data.jobs || []);
-        setErrorJobs(null);
-      })
-      .catch(() => setErrorJobs('Failed to load available jobs'))
-      .finally(() => setLoadingJobs(false));
+  const refreshAllData = async () => {
+    try {
+      setLoadingJobs(true);
+      const jobsData = await apiClient.getAvailableJobs();
+      setAvailableJobs(jobsData.jobs || []);
+      setErrorJobs(null);
+    } catch (err) {
+      setErrorJobs('Failed to load available jobs');
+      console.error('Error refreshing jobs:', err);
+    } finally {
+      setLoadingJobs(false);
+    }
     
-    getEditorProjects()
-      .then((data) => {
-        setMyProjects(data.projects || []);
-        setErrorProjects(null);
-      })
-      .catch(() => setErrorProjects('Failed to load your projects'))
-      .finally(() => setLoadingProjects(false));
+    try {
+      setLoadingProjects(true);
+      const projectsData = await apiClient.getEditorProjects();
+      setMyProjects(projectsData.projects || []);
+      setErrorProjects(null);
+    } catch (err) {
+      setErrorProjects('Failed to load your projects');
+      console.error('Error refreshing projects:', err);
+    } finally {
+      setLoadingProjects(false);
+    }
   };
 
   const markAsRead = async (id: string) => {
-    await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
-    setNotifications(notifications.map(n => n._id === id ? { ...n, read: true } : n));
-    setUnreadCount((prev) => Math.max(0, prev - 1));
+    try {
+      await apiClient.markNotificationAsRead(id);
+      setNotifications(notifications.map(n => n._id === id ? { ...n, read: true } : n));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
   };
 
   const markAllAsRead = async () => {
-    const unreadIds = notifications.filter(n => !n.read).map(n => n._id);
-    await Promise.all(unreadIds.map(id => fetch(`${API_BASE_URL}/notifications/${id}/read`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    })));
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
+    try {
+      const unreadIds = notifications.filter(n => !n.read).map(n => n._id);
+      await Promise.all(unreadIds.map(id => apiClient.markNotificationAsRead(id)));
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err);
+    }
   };
 
   return (
@@ -298,19 +323,19 @@ const EditorDashboard = () => {
                           </DropdownMenuContent>
                         </DropdownMenu>
                         {/* User Dropdown */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <div className="flex items-center cursor-pointer">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={user?.profilePicture || "/placeholder.svg?height=32&width=32"} />
-                            <AvatarFallback>{user?.name ? user.name[0] : 'E'}</AvatarFallback>
-                          </Avatar>
-                          <div className="ml-2 text-left">
-                            <div className="font-semibold text-gray-900 text-sm">{user?.name}</div>
-                            <div className="text-xs text-gray-500">{user?.email}</div>
-                          </div>
-                        </div>
-                      </DropdownMenuTrigger>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <div className="flex items-center cursor-pointer">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={user?.profilePicture || "/placeholder.svg?height=32&width=32"} />
+                                <AvatarFallback>{user?.name ? user.name[0] : 'E'}</AvatarFallback>
+                              </Avatar>
+                              <div className="ml-2 text-left">
+                                <div className="font-semibold text-gray-900 text-sm">{user?.name}</div>
+                                <div className="text-xs text-gray-500">{user?.email}</div>
+                              </div>
+                            </div>
+                          </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-56 rounded-2xl shadow-2xl bg-white/80 backdrop-blur-lg border-0 p-2 mt-2">
                             <DropdownMenuItem onClick={() => navigate('/profile')} className="rounded-xl px-4 py-3 text-gray-800 font-semibold hover:bg-gradient-to-r hover:from-teal-100 hover:to-emerald-100 hover:text-teal-900 transition-all mb-1">
                               Profile
@@ -318,8 +343,8 @@ const EditorDashboard = () => {
                             <DropdownMenuItem onClick={logout} className="rounded-xl px-4 py-3 text-red-600 font-semibold hover:bg-gradient-to-r hover:from-red-100 hover:to-orange-100 hover:text-red-800 transition-all">
                               Logout
                             </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </>
                     )}
                   </div>
@@ -418,38 +443,38 @@ const EditorDashboard = () => {
                       </div>
 
                       {loadingJobs ? (
-                        <p>Loading jobs...</p>
+                        <div className="text-center py-8">Loading jobs...</div>
                       ) : errorJobs ? (
-                        <p>Error: {errorJobs}</p>
+                        <div className="text-center text-red-500 py-8">Error: {errorJobs}</div>
                       ) : (
                         availableJobs.length === 0 ? (
                           <div className="text-center text-gray-500 py-8 text-lg font-medium">No jobs at this time.</div>
-                      ) : (
-                        availableJobs.map((job) => (
+                        ) : (
+                          availableJobs.map((job) => (
                             <Card key={job._id} className="hover:shadow-xl transition-shadow bg-white/90 border-0 rounded-2xl">
-                            <CardContent className="p-6">
-                              <div className="flex items-start justify-between mb-4">
-                                <div className="flex-1">
-                                  <div className="flex items-center space-x-2 mb-2">
-                                    <h4 className="text-lg font-semibold text-gray-900">{job.title}</h4>
-                                    <Badge className={getIndustryColor(job.industry)}>
-                                      {job.industry}
-                                    </Badge>
-                                  </div>
+                              <CardContent className="p-6">
+                                <div className="flex items-start justify-between mb-4">
+                                  <div className="flex-1">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                      <h4 className="text-lg font-semibold text-gray-900">{job.title}</h4>
+                                      <Badge className={getIndustryColor(job.industry)}>
+                                        {job.industry}
+                                      </Badge>
+                                    </div>
                                     <div className="flex items-center space-x-4 text-sm text-gray-500 mb-2">
                                       <span>By {job.owner?.name || job.client || 'N/A'}</span>
                                       <span>•</span><span className="font-bold text-green-700">Price: ₹{typeof job.totalPrice === 'number' ? job.totalPrice : 'N/A'}</span>
                                       {job.budget && <><span>•</span><span>Budget: ₹{job.budget}</span></>}
                                       {job.deadline && <><span>•</span><span>Deadline: {job.deadline}</span></>}
                                       {job.industry && <><span>•</span><span>Industry: {job.industry}</span></>}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-2xl font-bold text-green-600">{job.budget}</p>
+                                    <p className="text-sm text-gray-500">Deadline: {job.deadline}</p>
                                   </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-2xl font-bold text-green-600">{job.budget}</p>
-                                  <p className="text-sm text-gray-500">Deadline: {job.deadline}</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between">
                                   <Button
                                     variant="outline"
                                     className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:text-blue-800 hover:border-blue-300 transition-all duration-300 hover:scale-105"
@@ -459,16 +484,16 @@ const EditorDashboard = () => {
                                       setDetailsOpen(true);
                                     }}
                                   >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </Button>
-                                <Button className="bg-gradient-to-r from-teal-600 to-orange-500 hover:from-teal-700 hover:to-orange-600" onClick={() => handleAcceptProject(job)}>
-                                  Accept Project
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Details
+                                  </Button>
+                                  <Button className="bg-gradient-to-r from-teal-600 to-orange-500 hover:from-teal-700 hover:to-orange-600" onClick={() => handleAcceptProject(job)}>
+                                    Accept Project
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))
                         )
                       )}
                     </TabsContent>
@@ -479,9 +504,9 @@ const EditorDashboard = () => {
                       </div>
 
                       {loadingProjects ? (
-                        <p>Loading projects...</p>
+                        <div className="text-center py-8">Loading projects...</div>
                       ) : errorProjects ? (
-                        <p>Error: {errorProjects}</p>
+                        <div className="text-center text-red-500 py-8">Error: {errorProjects}</div>
                       ) : (
                         myProjects.map((project) => (
                           <Card key={project._id} className="hover:shadow-xl transition-shadow bg-white/90 border-0 rounded-2xl">
@@ -624,7 +649,7 @@ const EditorDashboard = () => {
                       </Button>
                     </CardContent>
                   </Card>
-
+                  
                   {/* Tips */}
                   <Card className="bg-gradient-to-br from-orange-50 via-white to-yellow-50 shadow-xl border-0 rounded-2xl">
                     <CardHeader className="pb-2">
